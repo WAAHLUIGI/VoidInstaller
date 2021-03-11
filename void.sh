@@ -18,8 +18,9 @@ sha256sum -c --ignore-missing sha256sum.txt
 echo "What partition do you want to install Void on? \c"
 read PARTITION
 
-mkdir voidinstall
-mount $PARTITION ./voidinstall/
+
+mkdir voidinstall				# make a new directory and mount it under it, since /mnt
+mount $PARTITION ./voidinstall/			# could already have something mounted on it
 rm -rf voidinstall/*
 tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C voidinstall
 mount --rbind /sys voidinstall/sys && mount --make-rslave voidinstall/sys
