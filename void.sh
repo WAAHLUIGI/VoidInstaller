@@ -31,6 +31,11 @@ echo "xbps-install -Syu xbps;  xbps-install -yu;  xbps-install -y base-system;  
 PS1='(chroot) # ' chroot voidinstall/ ./hell.sh
 # ask the user what filesystem they want to use on it, use mkfs. accordingly, then do an (optional) bad block check using fsck -vcck
 
-blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}'
+#blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}'
 # this line up here is what the contributors worked for a lot, it was hell to get regex working. this will print out the UUID of the partition the user is
 #installing Void Linux on.
+
+#blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}' >> /etc/fstab
+#this will directly get the line to /etc/fstab, one problem is that it doesn't have UUID= at the beginning of it
+var=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
+#now that works wonderfully
