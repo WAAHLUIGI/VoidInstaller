@@ -27,7 +27,7 @@ mount --rbind /sys voidinstall/sys && mount --make-rslave voidinstall/sys
 mount --rbind /dev voidinstall/dev && mount --make-rslave voidinstall/dev
 mount --rbind /proc voidinstall/proc && mount --make-rslave voidinstall/proc
 echo "nameserver 192.168.1.1" > voidinstall/etc/resolv.conf
-echo "xbps-install -Syu xbps;  xbps-install -yu;  xbps-install -y base-system;  xbps-remove -y base-voidstrap; xbps-install -y grub; xbps-install -y xfce4; xbps-install -y vim; ln -s /etc/sv/dhcpcd /var/service/; ln -s /etc/sv/alsa /var/service/; passwd; " >> voidinstall/hell.sh & chmod +x voidinstall/hell.sh
+echo "xbps-install -Syu xbps;  xbps-install -yu;  xbps-install -y base-system;  xbps-remove -y base-voidstrap; xbps-install -y grub xfce4 vim; ln -s /etc/sv/dhcpcd /var/service/; ln -s /etc/sv/alsa /var/service/; passwd; " >> voidinstall/hell.sh & chmod +x voidinstall/hell.sh
 PS1='(chroot) # ' chroot voidinstall/ ./hell.sh
 # ask the user what filesystem they want to use on it, use mkfs. accordingly, then do an (optional) bad block check using fsck -vcck
 
