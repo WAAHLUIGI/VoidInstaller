@@ -39,3 +39,4 @@ PS1='(chroot) # ' chroot voidinstall/ ./hell.sh
 #this will directly get the line to /etc/fstab, one problem is that it doesn't have UUID= at the beginning of it
 var=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
 #now that works wonderfully
+echo "UUID="$var >> /etc/fstab # new untested thing
