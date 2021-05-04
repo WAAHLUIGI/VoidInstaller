@@ -15,13 +15,19 @@ wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/v
 signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
 sha256sum -c --ignore-missing sha256sum.txt
 
-echo"Do you want to partition your disk? \c"
+echo "Do you want to partition your disk?[y/N] \c"
 read DISKANSWER
+if ($DISKANSWER == "") then
+	echo "Not partitioning, continuing"
+fi
 if ($DISKANSWER == "y") then
 	lsblk
 	echo "What device do you want to partition? \c"
 	read DISKNAME
 	cfdisk $DISKNAME
+elif ($DISKANSWER == "n") then
+	echo "Not partitioning, continuing"
+fi
 echo "What partition do you want to install Void on? \c"
 read PARTITION
 
