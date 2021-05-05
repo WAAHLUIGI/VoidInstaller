@@ -14,22 +14,45 @@
 
 #signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
 #sha256sum -c --ignore-missing sha256sum.txt
-yes=y
-no="n"
 
-echo "Do you want to partition your disk?[y/N] \c"
+echo "Do you want to partition your disk?[y/N]"
+
 read DISKANSWER
+
+if [ $DISKANSWER = "y" ]
+then
+	lsblk
+	echo -n "What device do you want to partition?"
+	
+	read DISKNAME
+	cfdisk /dev/$DISKNAME
+elif [ $DISKANSWER = "Y" ]
+then
+lsblk
+	echo "What device do you want to partition?"
+
+	read DISKNAME2
+	cfdisk /dev/$DISKNAME2
+
+elif [ $DISKANSWER = "n" ]
+then
+	echo "Not partitioning, continuing"
+
+elif [ $DISKANSWER = "N" ]
+then
+	echo "Not partitioning, continuing"
+fi
 #if ($DISKANSWER == "") then
 #	echo "Not partitioning, continuing"
 #fi
-if ($DISKANSWER == $yes) then
-	lsblk
-	echo "What device do you want to partition? \c"
-	read DISKNAME
-	cfdisk $DISKNAME
+#if ($DISKANSWER == "$yes") then
+#	lsblk
+#	echo "What device do you want to partition? \c"
+#	read DISKNAME
+#	cfdisk $DISKNAME
 #elif ($DISKANSWER == n) then
 #	echo "Not partitioning, continuing"
-fi
+#fi
 echo "What partition do you want to install Void on? \c"
 read PARTITION
 
