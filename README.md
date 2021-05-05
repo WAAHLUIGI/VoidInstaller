@@ -4,4 +4,5 @@ This script will automatically set up Void Linux, it is still a thing in progres
 Dependencies:
 
 Signify
+
 Wget
