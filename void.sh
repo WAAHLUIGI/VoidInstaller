@@ -19,8 +19,8 @@ echo "Do you want to partition your disk?[y/N]"
 
 read DISKANSWER
 
-if [ $DISKANSWER = "y" ]
-then
+if [ $DISKANSWER = "y" ] # Whatever I fucking tried, I can't get an OR operator (||) to work at all
+then			 # If I can find a way around it we can really shorten this code, which would be great
 	lsblk
 	echo -n "What device do you want to partition?"
 	
@@ -41,18 +41,22 @@ then
 elif [ $DISKANSWER = "N" ]
 then
 	echo "Not partitioning, continuing"
+
+elif	
+	echo "Not partitioning, continuing"
 fi
-#if ($DISKANSWER == "") then
-#	echo "Not partitioning, continuing"
-#fi
-#if ($DISKANSWER == "$yes") then
-#	lsblk
-#	echo "What device do you want to partition? \c"
-#	read DISKNAME
-#	cfdisk $DISKNAME
-#elif ($DISKANSWER == n) then
-#	echo "Not partitioning, continuing"
-#fi
+# ------------------------------------------------------------------------------|
+#if ($DISKANSWER == "") then							|
+#	echo "Not partitioning, continuing"	Do not touch!!			|
+#fi										|
+#if ($DISKANSWER == "$yes") then						|
+#	lsblk									|
+#	echo "What device do you want to partition? \c"				|
+#	read DISKNAME								|
+#	cfdisk $DISKNAME							|
+#elif ($DISKANSWER == n) then							|
+#	echo "Not partitioning, continuing"					|
+#fi-----------------------------------------------------------------------------|
 echo "What partition do you want to install Void on? \c"
 read PARTITION
 
@@ -60,11 +64,11 @@ read PARTITION
 mkdir voidinstall				# make a new directory and mount it under it, since /mnt
 mount $PARTITION ./voidinstall/			# could already have something mounted on it
 rm -rf voidinstall/*
-tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C voidinstall
-mount --rbind /sys voidinstall/sys && mount --make-rslave voidinstall/sys
-mount --rbind /dev voidinstall/dev && mount --make-rslave voidinstall/dev
-mount --rbind /proc voidinstall/proc && mount --make-rslave voidinstall/proc
-echo "nameserver 192.168.1.1" > voidinstall/etc/resolv.conf
+tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./voidinstall
+mount --rbind /sys ./voidinstall/sys && mount --make-rslave ./voidinstall/sys
+mount --rbind /dev ./voidinstall/dev && mount --make-rslave voidinstall/dev
+mount --rbind /proc ./voidinstall/proc && mount --make-rslave ./voidinstall/proc
+echo "nameserver 192.168.1.1" > ./voidinstall/etc/resolv.conf
 echo "xbps-install -Syu xbps;  xbps-install -yu;  xbps-install -y base-system;  xbps-remove -y base-voidstrap; xbps-install -y grub xfce4 vim; ln -s /etc/sv/dhcpcd /var/service/; ln -s /etc/sv/alsa /var/service/; passwd; " >> voidinstall/hell.sh & chmod +x voidinstall/hell.sh
 PS1='(chroot) # ' chroot voidinstall/ ./hell.sh
 # ask the user what filesystem they want to use on it, use mkfs. accordingly, then do an (optional) bad block check using fsck -vcck
