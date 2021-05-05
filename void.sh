@@ -3,30 +3,32 @@
 
 #fetch the rootfs tarball, the sha256sums and the signatures
 
-wget https://alpha.de.repo.voidlinux.org/live/current/void-x86_64-ROOTFS-20210218.tar.xz
-wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.sig
-wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.txt
-wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/void-release-keys/files/void-release-20210218.pub
+#wget https://alpha.de.repo.voidlinux.org/live/current/void-x86_64-ROOTFS-20210218.tar.xz
+#wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.sig
+#wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.txt
+#wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/void-release-keys/files/void-release-20210218.pub
 
 
 # Verify the image for security
 
 
-signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
-sha256sum -c --ignore-missing sha256sum.txt
+#signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
+#sha256sum -c --ignore-missing sha256sum.txt
+yes=y
+no="n"
 
 echo "Do you want to partition your disk?[y/N] \c"
 read DISKANSWER
-if ($DISKANSWER == "") then
-	echo "Not partitioning, continuing"
-fi
-if ($DISKANSWER == "y") then
+#if ($DISKANSWER == "") then
+#	echo "Not partitioning, continuing"
+#fi
+if ($DISKANSWER == $yes) then
 	lsblk
 	echo "What device do you want to partition? \c"
 	read DISKNAME
 	cfdisk $DISKNAME
-elif ($DISKANSWER == "n") then
-	echo "Not partitioning, continuing"
+#elif ($DISKANSWER == n) then
+#	echo "Not partitioning, continuing"
 fi
 echo "What partition do you want to install Void on? \c"
 read PARTITION
@@ -53,3 +55,6 @@ PS1='(chroot) # ' chroot voidinstall/ ./hell.sh
 var=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
 #now that works wonderfully
 echo "UUID="$var >> /etc/fstab # new untested thing
+rm sha256*
+rm void-release*
+rm void-x86_64-*
