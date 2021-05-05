@@ -19,6 +19,8 @@ echo "Do you want to partition your disk?[y/N]"
 
 read DISKANSWER
 
+#these commits are getting hellish
+
 if [ $DISKANSWER = "y" ] # Whatever I fucking tried, I can't get an OR operator (||) to work at all
 then			 # If I can find a way around it we can really shorten this code, which would be great
 	lsblk
