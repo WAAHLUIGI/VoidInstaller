@@ -1,78 +1,49 @@
 #!/bin/sh
 
+# Sync XBPS, update it, and install depencancies
+xbps-install -Sy;
+xbps-install -u xbps;
+xbps-install -y wget signify
 
-#fetch the rootfs tarball, the sha256sums and the signatures
+# Fetch rootfs tarball, sha256sum files and signatures
 
-#wget https://alpha.de.repo.voidlinux.org/live/current/void-x86_64-ROOTFS-20210218.tar.xz
-#wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.sig
-#wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.txt
-#wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/void-release-keys/files/void-release-20210218.pub
-
+wget https://alpha.de.repo.voidlinux.org/live/current/void-x86_64-ROOTFS-20210218.tar.xz
+wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.sig
+wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.txt
+wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/void-release-keys/files/void-release-20210218.pub
 
 # Verify the image for security
 
+signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
+sha256sum -c --ignore-missing sha256sum.txt
 
-#signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
-#sha256sum -c --ignore-missing sha256sum.txt
-
-echo "Do you want to partition your disk?[y/N]"
-
+echo "Do you want to partition your disk?[y/N] \c"
 read DISKANSWER
-
-#these commits are getting hellish
-
-if [ $DISKANSWER = "y" ] # Whatever I fucking tried, I can't get an OR operator (||) to work at all
-then			 # If I can find a way around it we can really shorten this code, which would be great
-	lsblk
-	echo -n "What device do you want to partition?"
-	
-	read DISKNAME
-	cfdisk /dev/$DISKNAME
-elif [ $DISKANSWER = "Y" ]
-then
-lsblk
-	echo "What device do you want to partition?"
-
-	read DISKNAME2
-	cfdisk /dev/$DISKNAME2
-
-elif [ $DISKANSWER = "n" ]
-then
-	echo "Not partitioning, continuing"
-
-elif [ $DISKANSWER = "N" ]
-then
-	echo "Not partitioning, continuing"
-
-elif	
-	echo "Not partitioning, continuing"
+#if ($DISKANSWER == "") then
+#	echo "Not partitioning, continuing"
+#fi
+if ($DISKANSWER == y) then
+	lsblk;
+	echo -n "What device do you want to partition? ";
+	read DISKNAME;
+	cfdisk $DISKNAME;
+elif ($DISKANSWER == n) then
+	echo "Not partitioning, continuing";
 fi
-# ------------------------------------------------------------------------------|
-#if ($DISKANSWER == "") then							|
-#	echo "Not partitioning, continuing"	Do not touch!!			|
-#fi										|
-#if ($DISKANSWER == "$yes") then						|
-#	lsblk									|
-#	echo "What device do you want to partition? \c"				|
-#	read DISKNAME								|
-#	cfdisk $DISKNAME							|
-#elif ($DISKANSWER == n) then							|
-#	echo "Not partitioning, continuing"					|
-#fi-----------------------------------------------------------------------------|
-echo "What partition do you want to install Void on? \c"
+echo -n "What partition do you want to install Void on? "
 read PARTITION
 
 
-mkdir voidinstall				# make a new directory and mount it under it, since /mnt
+mkdir voidinstall				            # Make a new directory and mount $PARTITION under it, since /mnt
 mount $PARTITION ./voidinstall/			# could already have something mounted on it
 rm -rf voidinstall/*
-tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./voidinstall
-mount --rbind /sys ./voidinstall/sys && mount --make-rslave ./voidinstall/sys
-mount --rbind /dev ./voidinstall/dev && mount --make-rslave voidinstall/dev
-mount --rbind /proc ./voidinstall/proc && mount --make-rslave ./voidinstall/proc
-echo "nameserver 192.168.1.1" > ./voidinstall/etc/resolv.conf
-echo "xbps-install -Syu xbps;  xbps-install -yu;  xbps-install -y base-system;  xbps-remove -y base-voidstrap; xbps-install -y grub xfce4 vim; ln -s /etc/sv/dhcpcd /var/service/; ln -s /etc/sv/alsa /var/service/; passwd; " >> voidinstall/hell.sh & chmod +x voidinstall/hell.sh
-PS1='(chroot) # ' chroot voidinstall/ ./hell.sh
+tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C voidinstall
+mount --rbind /sys voidinstall/sys && mount --make-rslave voidinstall/sys
+mount --rbind /dev voidinstall/dev && mount --make-rslave voidinstall/dev
+mount --rbind /proc voidinstall/proc && mount --make-rslave voidinstall/proc
+echo "nameserver 192.168.1.1" > voidinstall/etc/resolv.conf
+echo "xbps-install -Syu xbps;  xbps-install -yu;  xbps-install -y base-system;  xbps-remove -y base-voidstrap; xbps-install -y grub xfce4 vim; ln -s /etc/sv/dhcpcd /var/service/; ln -s /etc/sv/alsa /var/service/; passwd; " >> voidinstall/setup.sh & chmod +x voidinstall/setup.sh
+PS1='(chroot) # ' chroot voidinstall/ ./setup.sh
 # ask the user what filesystem they want to use on it, use mkfs. accordingly, then do an (optional) bad block check using fsck -vcck
 
 #blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}'
