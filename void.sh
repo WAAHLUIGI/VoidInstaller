@@ -1,9 +1,8 @@
 #!/bin/sh
 
 # Sync XBPS, update it, and install depencancies
-xbps-install -Sy;
-xbps-install -u xbps;
-xbps-install -y wget signify
+xbps-install -Syu xbps;
+xbps-install -y wget signify;
 
 # Fetch rootfs tarball, sha256sum files and signatures
 
@@ -17,7 +16,7 @@ wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/v
 signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
 sha256sum -c --ignore-missing sha256sum.txt
 
-echo "Do you want to partition your disk?[y/N] \c"
+echo -n "Do you want to partition your disk?[y/N] "
 read DISKANSWER
 #if ($DISKANSWER == "") then
 #	echo "Not partitioning, continuing"
