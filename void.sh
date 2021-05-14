@@ -17,10 +17,13 @@
 
 echo "[A]utomatic Install / [M]anual Install"
 read automanualinstall
-if [ $automanualinstall = "A" ]
+if [ $automanualinstall = "A" ] || [ $automanualinstall = "a" ]
 then
 	echo "this was a test thing, we'll develop this part later"
-elif [ $automanualinstall = "M" ]
+#elif [ $automanualinstall = "a" ]
+#then
+#	echo "this was a test thing, we'll develop this part later"
+elif [ $automanualinstall = "M" ] || [ $automanualinstall = "m" ]
 then
 
 	echo "Do you want to partition your disk?[y/N]"
@@ -29,44 +32,19 @@ then
 
 #these commits are getting hellish
 
-	if [ $DISKANSWER = "y" ]  # Whatever I fucking tried, I can't get an OR operator (||) to work at all
-	then			           # If I can find a way around it we can really shorten this code, which would be great
+	if [ $DISKANSWER = "y" ] || [ $DISKANSWER = "Y" ] # Whatever I fucking tried, I can't get an OR operator (||) to work at all
+	then						  # If I can find a way around it we can really shorten this code, which would be great
+							  # HOLY FUCKING SHIT I DID IT IT GAVE NO SYNTAX ERRORS THERE ARE NOW OR OPERATORS
 		lsblk
 		echo -n "What device do you want to partition?"
 	
 		read DISKNAME
 		cfdisk /dev/$DISKNAME
-	elif [ $DISKANSWER = "Y" ]
-	then
-		lsblk
-		echo "What device do you want to partition?"
-	
-		read DISKNAME2
-		cfdisk /dev/$DISKNAME2
 
-	elif [ $DISKANSWER = "n" ]
+	elif [ $DISKANSWER = "n" ] || [ $DISKANSWER = "N" ]
 	then
 		echo "Not partitioning, continuing"
-
-	elif [ $DISKANSWER = "N" ]
-	then
-		echo "Not partitioning, continuing"
-	
-	#elif	
-	#	echo "Not partitioning, continuing"
 	fi
-# ------------------------------------------------------------------------------|
-#if ($DISKANSWER == "") then							|
-#	echo "Not partitioning, continuing"	Do not touch!!			|
-#fi										|
-#if ($DISKANSWER == "$yes") then						|
-#	lsblk									|
-#	echo "What device do you want to partition? \c"				|
-#	read DISKNAME								|
-#	cfdisk $DISKNAME							|
-#elif ($DISKANSWER == n) then							|
-#	echo "Not partitioning, continuing"					|
-#fi-----------------------------------------------------------------------------|
 	echo "What partition do you want to install Void on? \c"
 	read PARTITION
 
