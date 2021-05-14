@@ -20,9 +20,7 @@ read automanualinstall
 if [ $automanualinstall = "A" ] || [ $automanualinstall = "a" ]
 then
 	echo "this was a test thing, we'll develop this part later"
-#elif [ $automanualinstall = "a" ]
-#then
-#	echo "this was a test thing, we'll develop this part later"
+
 elif [ $automanualinstall = "M" ] || [ $automanualinstall = "m" ]
 then
 
