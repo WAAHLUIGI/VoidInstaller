@@ -34,7 +34,7 @@ then
 	then						  # If I can find a way around it we can really shorten this code, which would be great
 							  # HOLY FUCKING SHIT I DID IT IT GAVE NO SYNTAX ERRORS THERE ARE NOW OR OPERATORS
 		lsblk
-		echo -n "What device do you want to partition?"
+		echo -n "What device do you want to partition? "
 	
 		read DISKNAME
 		cfdisk /dev/$DISKNAME
