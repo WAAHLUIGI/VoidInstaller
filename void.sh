@@ -1,16 +1,20 @@
 #!/bin/sh
 
+# Sync XBPS, update it, and install depencancies
+xbps-install -Syu xbps;
+xbps-install -y wget signify;
 
-#fetch the rootfs tarball, the sha256sums and the signatures
+# Fetch rootfs tarball, sha256sum files and signatures
 
-#wget https://alpha.de.repo.voidlinux.org/live/current/void-x86_64-ROOTFS-20210218.tar.xz
-#wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.sig
-#wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.txt
-#wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/void-release-keys/files/void-release-20210218.pub
-
+wget https://alpha.de.repo.voidlinux.org/live/current/void-x86_64-ROOTFS-20210218.tar.xz
+wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.sig
+wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.txt
+wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/void-release-keys/files/void-release-20210218.pub
 
 # Verify the image for security
 
+signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
+sha256sum -c --ignore-missing sha256sum.txt
 
 #signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
 #sha256sum -c --ignore-missing sha256sum.txt
@@ -30,9 +34,8 @@ then
 
 #these commits are getting hellish
 
-	if [ $DISKANSWER = "y" ] || [ $DISKANSWER = "Y" ] # Whatever I fucking tried, I can't get an OR operator (||) to work at all
-	then						  # If I can find a way around it we can really shorten this code, which would be great
-							  # HOLY FUCKING SHIT I DID IT IT GAVE NO SYNTAX ERRORS THERE ARE NOW OR OPERATORS
+	if [ $DISKANSWER = "y" ] || [ $DISKANSWER = "Y" ] 
+  then
 		lsblk
 		echo -n "What device do you want to partition? "
 	
