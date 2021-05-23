@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-#Void Install Script, V3.0.6.1
+#Void Install Script, V3.0.6.3
 #You are not (yet) permitted to distribute this script.
 #This script is still a work in progress, and whatever happens to your
 #property when you run this script is completely your responsibility!
@@ -102,8 +102,9 @@ then
 	mount --rbind /dev ./voidinstall/dev && mount --make-rslave voidinstall/dev
 	mount --rbind /proc ./voidinstall/proc && mount --make-rslave ./voidinstall/proc
 	echo "nameserver 192.168.1.1" > ./voidinstall/etc/resolv.conf
-	echo "xbps-install -Syu xbps;  xbps-install -yu;  xbps-install -y base-system;  xbps-remove -y base-voidstrap; xbps-install -y grub xfce4 vim; ln -s /etc/sv/dhcpcd /var/service/; ln -s /etc/sv/alsa /var/service/; passwd; " >> voidinstall/hell.sh & chmod +x voidinstall/hell.sh
-	PS1='(chroot) # ' chroot voidinstall/ ./hell.sh
+	
+	su root -c "chroot ./voidinstall /bin/bash xbps-install -Syu; xbps-install -y vim grub;"
+
 	# ask the user what filesystem they want to use on it, use mkfs. accordingly, then do an (optional) bad block check using fsck -vcck
 	
 	#blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}'
@@ -112,9 +113,11 @@ then
 	
 	#blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}' >> /etc/fstab
 	#this will directly get the line to /etc/fstab, one problem is that it doesn't have UUID= at the beginning of it
-	var=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
+	var=$(blkid | grep sda1 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
 	#now that works wonderfully
-	echo "UUID="$var >> /etc/fstab # new untested thing
+	echo "UUID=$var" >> ./voidinstall/etc/fstab
+	var2=$(blkid | grep sda2 | awk -F 'UUID="' '{print$2}' | awk -F '" ' '{print $1}')
+	echo "UUID=$var2" >> ./voidinstall/etc/fstab
 	rm sha256*
 	rm void-release*
 	rm void-x86_64-*
