@@ -1,29 +1,72 @@
 #!/bin/sh
 
-# Sync XBPS, update it, and install depencancies
-xbps-install -Syu xbps;
-xbps-install -y wget signify;
 
-# Fetch rootfs tarball, sha256sum files and signatures
+#Void Install Script, V3.0.6.1
+#You are not (yet) permitted to distribute this script.
+#This script is still a work in progress, and whatever happens to your
+#property when you run this script is completely your responsibility!
+#I, the lead developer of this script, don't take any responsibility
+#for the stuff happening to your computer, or any of your property for that matter.
+
+
+#fetch the rootfs tarball, the sha256sums and the signatures
 
 wget https://alpha.de.repo.voidlinux.org/live/current/void-x86_64-ROOTFS-20210218.tar.xz
 wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.sig
 wget https://alpha.de.repo.voidlinux.org/live/current/sha256sum.txt
 wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/void-release-keys/files/void-release-20210218.pub
 
+
 # Verify the image for security
+
 
 signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
 sha256sum -c --ignore-missing sha256sum.txt
-
-#signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
-#sha256sum -c --ignore-missing sha256sum.txt
 
 echo "[A]utomatic Install / [M]anual Install"
 read automanualinstall
 if [ $automanualinstall = "A" ] || [ $automanualinstall = "a" ]
 then
-	echo "this was a test thing, we'll develop this part later"
+	if [ -d "/sys/firmware/efi" ]
+	then
+		echo "This is your place to shine, Kat!"
+	elif [ ! -d "/sys/firmware/efi" ]
+	then
+		echo "Partitioning for a BIOS system."
+		fdisk /dev/sda << FDISK_CMDS
+o
+n
+p
+1
+
++30G
+n
+p
+2
+
+
+w
+FDISK_CMDS
+		partx /dev/sda
+		mkfs.ext4 /dev/sda1
+		mkfs.ext4 /dev/sda2
+		mkdir temp
+		mount /dev/sda1 ./temp
+		tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./temp
+		echo "nameserver 192.168.1.1" > ./temp/etc/resolv.conf
+		#the below part will set up /etc/fstab.
+		var=$(blkid | grep sda1 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
+		echo "UUID=$var	/	ext4	defaults,noatime,nodiratime	0 1" >> ./temp/etc/fstab # I have suspicions that this will work, since $var is inside the strings of the echo command. Gotta get this tested...
+		var2=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}' )
+		echo "UUID=$var2	/home	ext4	defaults,noatime,nodiratime	0 2" >> ./temp/etc/fstab
+		mount --rbind /sys ./temp && mount --make-rslave ./temp/sys
+		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
+		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
+		
+		su root -c "chroot ./tempvoidinstalldir/ /bin/bash xbps-install -Syu; xbps-install -y vim; xbps-install -y grub; grub-install /dev/sda; xbps-reconfigure -fa; exit"
+		echo "OS should be installed. Rebooting now."
+		shutdown -r now
+	fi
 
 elif [ $automanualinstall = "M" ] || [ $automanualinstall = "m" ]
 then
@@ -34,8 +77,9 @@ then
 
 #these commits are getting hellish
 
-	if [ $DISKANSWER = "y" ] || [ $DISKANSWER = "Y" ] 
-  then
+	if [ $DISKANSWER = "y" ] || [ $DISKANSWER = "Y" ] # Whatever I fucking tried, I can't get an OR operator (||) to work at all
+	then						  # If I can find a way around it we can really shorten this code, which would be great
+							  # HOLY FUCKING SHIT I DID IT IT GAVE NO SYNTAX ERRORS THERE ARE NOW OR OPERATORS
 		lsblk
 		echo -n "What device do you want to partition? "
 	
