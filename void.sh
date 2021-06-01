@@ -1,13 +1,16 @@
 #!/bin/sh
 
 
-#Void Install Script, V3.0.6.3
+#VoidX, Void Install Script, V3.0.6.4
 #You are not (yet) permitted to distribute this script.
 #This script is still a work in progress, and whatever happens to your
 #property when you run this script is completely your responsibility!
 #I, the lead developer of this script, don't take any responsibility
 #for the stuff happening to your computer, or any of your property for that matter.
 
+
+#To do: make an image for Windows users, make this installer a lot more appealing for
+# users of other OSes (Windows, Mac, BSD, whatever's left)
 
 #fetch the rootfs tarball, the sha256sums and the signatures
 
@@ -33,6 +36,8 @@ then
 	elif [ ! -d "/sys/firmware/efi" ]
 	then
 		echo "Partitioning for a BIOS system."
+		echo "Checking the disk size."
+
 		fdisk /dev/sda << FDISK_CMDS
 o
 n
@@ -63,7 +68,7 @@ FDISK_CMDS
 		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
 		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
 		
-		su root -c "chroot ./tempvoidinstalldir/ /bin/bash xbps-install -Syu; xbps-install -y vim; xbps-install -y grub; grub-install /dev/sda; xbps-reconfigure -fa; exit"
+		su root -c "chroot ./tempvoidinstalldir/ /bin/bash; xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; grub-install /dev/sda; xbps-reconfigure -fa; exit"
 		echo "OS should be installed. Rebooting now."
 		shutdown -r now
 	fi
