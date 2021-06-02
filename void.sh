@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-#VoidX, Void Install Script, V3.0.7.4
+#VoidX, Void Install Script, V3.0.7.5
 #You are not (yet) permitted to distribute this script.
 #This script is still a work in progress, and whatever happens to your
 #property when you run this script is completely your responsibility!
@@ -52,7 +52,7 @@ n
 
 t
 1
-EF00
+uefi
 w
 FDISK_CMDS
 		partx /dev/sda
