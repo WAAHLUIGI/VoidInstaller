@@ -12,7 +12,7 @@
 #To do: make an image for Windows users, make this installer a lot more appealing for
 # users of other OSes (Windows, Mac, BSD, whatever's left)
 #WORK ON ADDING THE EFI PARTITION TO THE FSTAB
-
+# Work on managing UEFI/GPT / BIOS/MBR in Manual install's partitioning structure
 #fetch the rootfs tarball, the sha256sums and the signatures
 
 wget https://alpha.de.repo.voidlinux.org/live/current/void-x86_64-ROOTFS-20210218.tar.xz
@@ -36,7 +36,7 @@ then
 		echo "This is your place to shine, Kat!"
 		#My attempt at UEFI partitioning.
 		
-		fdisk /dev/sda << FDISK_CMDS
+		su root -c "fdisk /dev/sda << FDISK_CMDS
 g
 n
 1
@@ -55,7 +55,7 @@ t
 uefi
 w
 FDISK_CMDS
-		partx /dev/sda
+		partx /dev/sda"
 
 		# A lot more lines will replace these basic ones.
 		# We will check the disk size, and determine partition
@@ -66,27 +66,22 @@ FDISK_CMDS
 		# Don't want the user to go through what I did before...
 		# it was hellish. These lines are all temporary.
 
-		mkfs.vfat /dev/sda1
-		mkfs.ext4 /dev/sda2
+		su root -c "mkfs.vfat /dev/sda1 \
+		mkfs.ext4 /dev/sda2 \
 		mkfs.ext4 /dev/sda3
-		mkdir temp
-		mount /dev/sda2 ./temp
-		mkdir -p ./temp/boot/efi
-		mount /dev/sda1 ./temp/boot/efi/
-		tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./temp
-
-		echo "nameserver 192.168.1.1" > ./temp/etc/resolv.conf
-
-		#WORK ON ADDING THE EFI PARTITION TO THE FSTAB
-		# the below part will set up /etc/fstab
-		var=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
-		echo "UUID=$var	/	ext4	defaults,noatime,nodiratime	0 1" >> ./temp/etc/fstab # I still have suspicions that this will work, as I haven't tested it yet.
-		var2=$(blkid | grep sda3 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
-		echo "UUID=$var2	/home	ext4	defaults,noatime,nodiratime	0 2" >> ./temp/etc/fstab
-
-		mount --rbind /sys ./temp/sys && mount --make-rslave ./temp/sys
-		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
-		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
+		mkdir temp \
+		mount /dev/sda2 ./temp \
+		mkdir -p ./temp/boot/efi \
+		mount /dev/sda1 ./temp/boot/efi/ \
+		tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./temp \
+		echo "nameserver 192.168.1.1" > ./temp/etc/resolv.conf \
+		var=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}') \
+		echo "UUID=$var	/	ext4	defaults,noatime,nodiratime	0 1" >> ./temp/etc/fstab \
+		var2=$(blkid | grep sda3 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}') \
+		echo "UUID=$var2	/home	ext4	defaults,noatime,nodiratime	0 2" >> ./temp/etc/fstab \
+		mount --rbind /sys ./temp/sys && mount --make-rslave ./temp/sys \
+		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev \
+		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc"
 		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub-x86_64-efi firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="Void"; xbps-reconfigure -fa; exit"
 		echo "OS should be installed. Rebooting now."
 		shutdown -r now
