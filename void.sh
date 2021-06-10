@@ -1,12 +1,14 @@
 #!/bin/sh
 
 
-#VoidX, Void Install Script, V3.0.8.5
-#You are not (yet) permitted to distribute this script.
-#This script is still a work in progress, and whatever happens to your
-#property when you run this script is completely your responsibility!
-#I, the lead developer of this script, don't take any responsibility
-#for the stuff happening to your computer, or any of your property for that matter.
+########################################################################################
+###                    VoidX, Void Install Script, V3.0.7.5                          ###
+###             You are not (yet) permitted to distribute this script.               ### 
+###      This script is still a work in progress, and whatever happens to your       ###
+###      property when you run this script is completely your responsibility!        ###
+###      I, the lead developer of this script, don't take any responsibility         ###
+###for the stuff happening to your computer, or any of your property for that matter.###
+########################################################################################
 
 
 #To do: make an image for Windows users, make this installer a lot more appealing for
@@ -25,7 +27,7 @@ wget https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/v
 
 
 signify -C -p void-release-20210218.pub -x sha256sum.sig void-x86_64-ROOTFS-20210218.tar.xz
-sha256sum -c --ignore-missing sha256sum.txt
+sha256sum -c --ignore-missing sha25 6sum.txt
 
 echo "[A]utomatic Install / [M]anual Install"
 read automanualinstall
@@ -33,10 +35,12 @@ if [ $automanualinstall = "A" ] || [ $automanualinstall = "a" ]
 then
 	if [ -d "/sys/firmware/efi" ]
 	then
-		echo "This is your place to shine, Kat!"
 		#My attempt at UEFI partitioning.
-		
-		su root -c "fdisk /dev/sdb << FDISK_CMDS
+		lsblk
+		echo "What device do you want to partition \c"
+		read uefianswer
+
+		su root -c "fdisk /dev/$uefianswer << FDISK_CMDS
 g
 n
 1
@@ -89,10 +93,50 @@ FDISK_CMDS
 
 	elif [ ! -d "/sys/firmware/efi" ]
 	then
+		lsblk
+		echo "What device do you want to install Void on? \c"
+		read biosanswer
 		echo "Partitioning for a BIOS system."
 		echo "Checking the disk size."
+		biosdisksize=$(lsblk | grep -w $biosanswer | sed 's/[[:space:]] //g' | sed 's/G.*//' | cut -d ' ' -f 2)
+		if [ $biosdisksize < 16 ]
+		then
+			fdisk /dev/$biosanswer << FDISK_CMDS
+o
+n
+p
+1
 
-		fdisk /dev/sda << FDISK_CMDS
++2G
+n
+p
+2
+
+
+w
+FDISK_CMDS
+		partx /dev/$biosanswer
+		mkfs.ext4 /dev/sda1
+		mkfs.ext4 /dev/sda2
+		mkdir temp
+		mount /dev/sda1 ./temp
+		tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./temp
+		echo "nameserver 192.168.1.1" > ./temp/etc/resolv.conf
+		#the part below will set up /etc/fstab.
+		biosfstabvar=$(blkid | grep sda1 | awk -F 'UUID="' '{print $2}' | awk -F '" ' ' {print $1}')
+		echo "UUID=$var	/	ext4	defaults,noatime,nodiratime	0 1" >> ./temp/etc/fstab
+		biosfstabvar2=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
+		echo "UUID=$var2	/home	ext4	defaults,noatime,nodiratime	0 2" >> ./temp/etc/fstab
+		mount --rbind /sys ./temp && mount --make-rslave ./temp/sys
+		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
+		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
+		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam openshot okular atom lm_sensor; grub-install /dev/sda; xbps-reconfigure -fa; exit"
+		echo "OS should be installed. Exiting short debug..."
+		shutdown -r now
+		fi
+		elif [ $biosdisksize > 16 ] 
+		then
+			fdisk /dev/sda << FDISK_CMDS
 o
 n
 p
@@ -106,26 +150,25 @@ p
 
 w
 FDISK_CMDS
-		partx /dev/sda
-		mkfs.ext4 /dev/sda1
-		mkfs.ext4 /dev/sda2
-		mkdir temp
-		mount /dev/sda1 ./temp
-		tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./temp
-		echo "nameserver 192.168.1.1" > ./temp/etc/resolv.conf
-		#the below part will set up /etc/fstab.
-		var=$(blkid | grep sda1 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
-		echo "UUID=$var	/	ext4	defaults,noatime,nodiratime	0 1" >> ./temp/etc/fstab # I have suspicions that this will work, since $var is inside the strings of the echo command. Gotta get this tested...
-		var2=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}' )
-		echo "UUID=$var2	/home	ext4	defaults,noatime,nodiratime	0 2" >> ./temp/etc/fstab
-		mount --rbind /sys ./temp && mount --make-rslave ./temp/sys
-		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
-		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
-		
-		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; grub-install /dev/sda; xbps-reconfigure -fa; exit"
-		echo "OS should be installed. Rebooting now."
-		shutdown -r now
-
+			partx /dev/sda
+			mkfs.ext4 /dev/sda1
+			mkfs.ext4 /dev/sda2
+			mkdir temp
+			mount /dev/sda1 ./temp
+			tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./temp
+			echo "nameserver 192.168.1.1" > ./temp/etc/resolv.conf
+			#the below part will set up /etc/fstab.
+			var=$(blkid | grep sda1 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
+			echo "UUID=$var	/	ext4	defaults,noatime,nodiratime	0 1" >> ./temp/etc/fstab # I have suspicions that this will work, since $var is inside the strings of the echo command. Gotta get this tested...
+			var2=$(blkid | grep sda2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}' )
+			echo "UUID=$var2	/home	ext4	defaults,noatime,nodiratime	0 2" >> ./temp/etc/fstab
+			mount --rbind /sys ./temp && mount --make-rslave ./temp/sys
+			mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
+			mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
+			su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; grub-install /dev/sda; xbps-reconfigure -fa; exit"
+			echo "OS should be installed. Rebooting now."
+			shutdown -r now
+		fi
 elif [ $automanualinstall = "M" ] || [ $automanualinstall = "m" ]
 then
 
