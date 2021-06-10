@@ -2,7 +2,7 @@
 
 
 ########################################################################################
-###                    VoidX, Void Install Script, V3.0.7.5                          ###
+###                    VoidX, Void Install Script, V3.0.7.5d                         ###
 ###             You are not (yet) permitted to distribute this script.               ### 
 ###      This script is still a work in progress, and whatever happens to your       ###
 ###      property when you run this script is completely your responsibility!        ###
@@ -86,7 +86,7 @@ FDISK_CMDS
 		mount --rbind /sys ./temp/sys && mount --make-rslave ./temp/sys \
 		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev \
 		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc"
-		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub-x86_64-efi firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="Void" /dev/sdb; xbps-reconfigure -fa; exit"
+		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y base-system ; xbps-install -y vim xfce4 nano grub-x86_64-efi firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; xbps-remove base-voidstrap; grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="Void" /dev/sdb; xbps-reconfigure -fa; exit"
 		echo "OS should be installed. Rebooting now."
 		shutdown -r now
 	elif [ ! -d "/sys/firmware/efi" ]
@@ -128,7 +128,7 @@ FDISK_CMDS
 		mount --rbind /sys ./temp && mount --make-rslave ./temp/sys
 		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
 		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
-		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam openshot okular atom lm_sensor; grub-install /dev/sda; xbps-reconfigure -fa; exit"
+		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install base-system; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam openshot okular atom lm_sensor; xbps-remove base-voidstrap grub-install /dev/sda; xbps-reconfigure -fa; exit"
 		echo "OS should be installed. Exiting short debug..."
 		shutdown -r now
 		elif [ $biosdisksize > 16 ] 
@@ -162,7 +162,7 @@ FDISK_CMDS
 			mount --rbind /sys ./temp && mount --make-rslave ./temp/sys
 			mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
 			mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
-			su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; grub-install /dev/sda; xbps-reconfigure -fa; exit"
+			su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install base-system; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory;  xbps-remove base-voidstrap;  grub-install /dev/sda; xbps-reconfigure -fa; exit"
 			echo "OS should be installed. Rebooting now."
 			shutdown -r now
 		fi
