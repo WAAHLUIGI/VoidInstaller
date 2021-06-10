@@ -89,8 +89,6 @@ FDISK_CMDS
 		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub-x86_64-efi firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="Void" /dev/sdb; xbps-reconfigure -fa; exit"
 		echo "OS should be installed. Rebooting now."
 		shutdown -r now
-	fi
-
 	elif [ ! -d "/sys/firmware/efi" ]
 	then
 		lsblk
@@ -133,7 +131,6 @@ FDISK_CMDS
 		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam openshot okular atom lm_sensor; grub-install /dev/sda; xbps-reconfigure -fa; exit"
 		echo "OS should be installed. Exiting short debug..."
 		shutdown -r now
-		fi
 		elif [ $biosdisksize > 16 ] 
 		then
 			fdisk /dev/sda << FDISK_CMDS
