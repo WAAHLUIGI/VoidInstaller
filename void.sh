@@ -2,7 +2,7 @@
 
 
 ########################################################################################
-###                    VoidX, Void Install Script, V3.0.7.5d                         ###
+###                    VoidX, Void Install Script, V3.0.7.5e                         ###
 ###             You are not (yet) permitted to distribute this script.               ### 
 ###      This script is still a work in progress, and whatever happens to your       ###
 ###      property when you run this script is completely your responsibility!        ###
@@ -40,7 +40,7 @@ then
 		echo "What device do you want to partition \c"
 		read uefianswer
 
-		su root -c "fdisk /dev/$uefianswer << FDISK_CMDS
+		fdisk /dev/$uefianswer << FDISK_CMDS
 g
 n
 1
@@ -59,7 +59,7 @@ t
 uefi
 w
 FDISK_CMDS
-		partx /dev/sdb"
+		partx /dev/sdb
 
 		# A lot more lines will replace these basic ones.
 		# We will check the disk size, and determine partition
@@ -70,23 +70,23 @@ FDISK_CMDS
 		# Don't want the user to go through what I did before...
 		# it was hellish. These lines are all temporary.
 
-		su root -c "mkfs.vfat /dev/sdb1 \
-		mkfs.ext4 /dev/sdb2 \
-		mkfs.ext4 /dev/sdb3 \
-		mkdir temp \
-		mount /dev/sdb2 ./temp \
-		mkdir -p ./temp/boot/efi \
-		mount /dev/sdb1 ./temp/boot/efi/ \
-		tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./temp \
-		echo "nameserver 192.168.1.1" > ./temp/etc/resolv.conf \
-		var=$(blkid | grep sdb2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}') \
-		echo "UUID=$var	/	ext4	defaults,noatime,nodiratime	0 1" >> ./temp/etc/fstab \
-		var2=$(blkid | grep sdb3 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}') \
-		echo "UUID=$var2	/home	ext4	defaults,noatime,nodiratime	0 2" >> ./temp/etc/fstab \
-		mount --rbind /sys ./temp/sys && mount --make-rslave ./temp/sys \
-		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev \
-		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc"
-		su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y base-system ; xbps-install -y vim xfce4 nano grub-x86_64-efi firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; xbps-remove base-voidstrap; grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="Void" /dev/sdb; xbps-reconfigure -fa; exit"
+		mkfs.vfat /dev/sdb1 
+		mkfs.ext4 /dev/sdb2 
+		mkfs.ext4 /dev/sdb3 
+		mkdir temp 
+		mount /dev/sdb2 ./temp 
+		mkdir -p ./temp/boot/efi
+		mount /dev/sdb1 ./temp/boot/efi/
+		tar xvf void-x86_64-ROOTFS-20210218.tar.xz -C ./temp 
+		echo "nameserver 192.168.1.1" > ./temp/etc/resolv.conf 
+		var=$(blkid | grep sdb2 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}')
+		echo "UUID=$var	/	ext4	defaults,noatime,nodiratime	0 1" >> ./temp/etc/fstab 
+		var2=$(blkid | grep sdb3 | awk -F 'UUID="' '{print $2}' | awk -F '" ' '{print $1}') 
+		echo "UUID=$var2	/home	ext4	defaults,noatime,nodiratime	0 2" >> ./temp/etc/fstab
+		mount --rbind /sys ./temp/sys && mount --make-rslave ./temp/sys 
+		mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev 
+		mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
+		chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install -y base-system ; xbps-install -y vim xfce4 nano grub-x86_64-efi firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory; xbps-remove base-voidstrap; grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id="Void" /dev/sdb; xbps-reconfigure -fa; exit
 		echo "OS should be installed. Rebooting now."
 		shutdown -r now
 	elif [ ! -d "/sys/firmware/efi" ]
@@ -162,7 +162,7 @@ FDISK_CMDS
 			mount --rbind /sys ./temp && mount --make-rslave ./temp/sys
 			mount --rbind /dev ./temp/dev && mount --make-rslave ./temp/dev
 			mount --rbind /proc ./temp/proc && mount --make-rslave ./temp/proc
-			su root -c "chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install base-system; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory;  xbps-remove base-voidstrap;  grub-install /dev/sda; xbps-reconfigure -fa; exit"
+			chroot ./temp/ xbps-install -Su xbps; xbps-install -Syu; xbps-install base-system; xbps-install -y vim xfce4 nano grub firefox pulseaudio pavucontrol void-repo-multilib void-repo-nonfree; xbps-install -Sy steam wine wine-32bit wine-mono wine-gecko blender openshot okular atom lm_sensory;  xbps-remove base-voidstrap;  grub-install /dev/sda; xbps-reconfigure -fa; exit
 			echo "OS should be installed. Rebooting now."
 			shutdown -r now
 		fi

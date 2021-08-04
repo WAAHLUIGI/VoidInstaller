@@ -6,3 +6,7 @@ Dependencies:
 Signify
 
 Wget
+
+Tar, xz
+
+**Development is paused. Please check back later. We will return shortly.**
